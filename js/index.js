@@ -33,7 +33,9 @@ $(function () {
           case "value":
                 // TODO Math
                 //      Prevent cursur jumping
+                var oldPosition = editor.getCursorPosition();
                 editor.setValue(value, -1);
+                editor.gotoLine(oldPosition.row + 1, oldPosition.column)
                 editor.focus();
                 break;
           case "theme":
