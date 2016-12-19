@@ -15,36 +15,42 @@ $(function () {
     <id>: {
         value: "function hello()\n    return 42;\n}",
         lang: "js",
-        theme: "default"
+        theme: "default",
+        last_edit_by: <random>
     }
   }
   */
 
   var editorId = 123;
 
-  var $editor = document.getElementById("editor");
+  var uid = Math.random().toString();
+  var editor = null;
   //var $editor = document.getElementById("editor");
   //var $editor = document.getElementById("editor");
 
-  var isSaving = false;
   function updateData(field, value) {
       switch (field) {
           case "value":
-              $editor.value = value;
-              break;
+                // TODO Math
+                //      Prevent cursur jumping
+                editor.setValue(value, -1);
+                editor.focus();
+                break;
           case "theme":
-              //$theme.value = value;
-              break;
+                // Set the theme
+                editor.setTheme("ace/theme/" + value);
+                //$theme.value = value;
+                break;
           case "lang":
-              //$lang.value = value;
-              break;
+                // Set the language
+                editor.getSession().setMode("ace/mode/" + value);
+                //$lang.value = value;
+                break;
       }
   }
 
   function setEditorValue (c) {
-      if (isSaving) { return; }
       var val = c.val();
-
       if (val === null) {
           editorValues.child(editorId).set({
               value: "",
@@ -57,7 +63,22 @@ $(function () {
                     updateData(cField, val[cField]);
                 });
             }
-            updateData(c.key, val);
+
+            // If we want to update the value...
+            if (c.key === "value") {
+                // Get the last_edit_by value
+                c.ref.getParent().child("last_edit_by").once("value", function (snap) {
+                    // Check if the update was made by the current user
+                    if (snap.val() === uid) {
+                        return;
+                    }
+
+                    // ...otherwise, update the editor
+                    updateData(c.key, val);
+                });
+            } else {
+                updateData(c.key, val);
+            }
       }
   }
 
@@ -71,21 +92,27 @@ $(function () {
   var currentEditorValue = editorValues.child(editorId);
 
   // Take the editor value on start and set it in the editor
-  currentEditorValue.once("value", setEditorValue);
+  currentEditorValue.once("value", function (data) {
+    // Initialize the ACE editor
+    editor = ace.edit("editor");
+    editor.$blockScrolling = Infinity;
+
+      // When we change something in the editor, update the value in Firebase
+      editor.on("change", function(e) {
+          if (!editor.curOp || !editor.curOp.command.name) { return; }
+          currentEditorValue.update({
+              value: editor.getValue(),
+              last_edit_by: uid
+          }).then(function (c) {
+              console.log(c)
+          }).catch(function (e) {
+              console.error(e)
+          });
+      })
+
+      setEditorValue(data);
+  });
 
   // When the value is changed, update it in the editor
   currentEditorValue.on("child_changed", setEditorValue);
-
-  // When we change something in the editor, update the value in Firebase
-  $editor.oninput = function () {
-      isSaving = true;
-      currentEditorValue.update({
-          value: this.value
-      }).then(function (c) {
-          console.log(c)
-      }).catch(function (e) {
-          console.error(e)
-      });
-      isSaving = false;
-  };
 });
