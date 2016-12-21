@@ -5,3 +5,9 @@
     bottom: 0;
     left: 0;
 }
+
+.controls {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+}
