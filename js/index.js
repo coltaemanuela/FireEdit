@@ -31,10 +31,41 @@ $(function() {
     function updateData(field, value) {
         switch (field) {
             case "value":
-                // TODO Math
-                //      Prevent cursur jumping
+                var newLines = value.split("\n");
+                var oldLines = editor.getValue().split("\n");
+                var mergedLines = [];
                 var oldPosition = editor.getCursorPosition();
-                editor.setValue(value, -1);
+
+                // Different line was *changed*
+                if (newLines.length === oldLines.length) {
+                    newLines.forEach(function (c, i) {
+                        mergedLines[i] = c;
+                    });
+                } else {
+                    // Some lines were removed
+                    var wasAdded = newLines.length > oldLines.length;
+                    var added = wasAdded ? newLines : oldLines;
+                    var deleted = !wasAdded ? newLines : oldLines;
+                    var offset = newLines.length - oldLines.length;
+                    var isBefore = false;
+
+                    added = added.slice(0, oldPosition.row);
+                    for (var i = 0; i < added.length; ++i) {
+                        if (added[i] !== deleted[i]) {
+                            isBefore = true;
+                            break;
+                        }
+                    }
+
+                    if (isBefore) {
+                        oldPosition.row += offset;
+                    }
+
+
+                    mergedLines = newLines;
+                }
+
+                editor.setValue(mergedLines.join("\n"), -1);
                 editor.gotoLine(oldPosition.row + 1, oldPosition.column)
                 editor.focus();
                 break;
