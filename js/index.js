@@ -35,6 +35,14 @@ $(function() {
         } catch (e) {}
     }).val(getTheme());
 
+    var $selectLang = $("#select-lang").change(function () {
+        console.log(this.value);
+        currentEditorValue.update({
+            lang: this.value
+        });
+        editor.getSession().setMode("ace/mode/" + this.value.toLowerCase());
+    });
+
     var uid = Math.random().toString();
     var editor = null;
 
@@ -76,8 +84,10 @@ $(function() {
                 break;
             case "lang":
                 // Set the language
-                editor.getSession().setMode("ace/mode/" + value);
-                //$lang.value = value;
+                var cLang = $selectLang.val();
+                if (cLang !== value) {
+                    $selectLang.val(value).change();
+                }
                 break;
         }
     }
@@ -87,7 +97,7 @@ $(function() {
         if (val === null) {
             editorValues.child(editorId).set({
                 value: "",
-                lang: "text"
+                lang: "Plain Text"
             })
         } else {
             if (typeof val === "object") {
