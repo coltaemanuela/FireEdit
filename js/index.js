@@ -46,22 +46,17 @@ $(function() {
                     var wasAdded = newLines.length > oldLines.length;
                     var added = wasAdded ? newLines : oldLines;
                     var deleted = !wasAdded ? newLines : oldLines;
-                    var offset = newLines.length - oldLines.length;
-                    var isBefore = false;
+                    var offset = 0;
 
                     added = added.slice(0, oldPosition.row);
                     for (var i = 0; i < added.length; ++i) {
                         if (added[i] !== deleted[i]) {
-                            isBefore = true;
+                            offset = newLines.length - oldLines.length;
                             break;
                         }
                     }
 
-                    if (isBefore) {
-                        oldPosition.row += offset;
-                    }
-
-
+                    oldPosition.row += offset;
                     mergedLines = newLines;
                 }
 
