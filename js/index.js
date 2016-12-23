@@ -23,10 +23,20 @@ $(function() {
 
     var editorId = 123;
 
+    var LS_THEME_KEY = "editor-theme";
+    function getTheme() {
+        return localStorage.getItem(LS_THEME_KEY) || "ace/theme/monokai";
+    }
+
+    $("#select-theme").change(function () {
+        editor.setTheme(this.value);
+        try {
+            localStorage.setItem(LS_THEME_KEY, this.value);
+        } catch (e) {}
+    }).val(getTheme());
+
     var uid = Math.random().toString();
     var editor = null;
-    //var $editor = document.getElementById("editor");
-    //var $editor = document.getElementById("editor");
 
     function updateData(field, value) {
         switch (field) {
@@ -64,11 +74,6 @@ $(function() {
                 editor.gotoLine(oldPosition.row + 1, oldPosition.column)
                 editor.focus();
                 break;
-            case "theme":
-                // Set the theme
-                editor.setTheme("ace/theme/" + value);
-                //$theme.value = value;
-                break;
             case "lang":
                 // Set the language
                 editor.getSession().setMode("ace/mode/" + value);
@@ -82,8 +87,7 @@ $(function() {
         if (val === null) {
             editorValues.child(editorId).set({
                 value: "",
-                lang: "text",
-                theme: "monokai"
+                lang: "text"
             })
         } else {
             if (typeof val === "object") {
@@ -123,6 +127,7 @@ $(function() {
     currentEditorValue.once("value", function(data) {
         // Initialize the ACE editor
         editor = ace.edit("editor");
+        editor.setTheme(getTheme());
         editor.$blockScrolling = Infinity;
 
         // When we change something in the editor, update the value in Firebase
