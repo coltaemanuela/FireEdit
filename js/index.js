@@ -21,7 +21,12 @@ $(function() {
     }
     */
 
-    var editorId = 123;
+   // var editorId = 123;
+    //create a custom ID
+    var editorId=Url.queryString("id")||"_";
+	// if(!editorId){
+	// 	var defaultId=_id;
+	// }
 
     var LS_THEME_KEY = "editor-theme";
     function getTheme() {
