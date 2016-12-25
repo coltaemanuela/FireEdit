@@ -45,7 +45,7 @@ $(function() {
         currentEditorValue.update({
             lang: this.value
         });
-        editor.getSession().setMode("ace/mode/" + this.value.toLowerCase());
+        editor.getSession().setMode("ace/mode/" + this.value);
     });
 
     var uid = Math.random().toString();
