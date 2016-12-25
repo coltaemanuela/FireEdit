@@ -102,7 +102,7 @@ $(function() {
         if (val === null) {
             editorValues.child(editorId).set({
                 value: "",
-                lang: "Plain Text"
+                lang: "text"
             })
         } else {
             if (typeof val === "object") {
