@@ -13,10 +13,8 @@ $(function() {
     /*
     editor_values: {
       <id>: {
-          value: "function hello()\n    return 42;\n}",
           lang: "js",
-          theme: "default",
-          last_edit_by: <random>
+          queue: []
       }
     }
     */
@@ -51,108 +49,12 @@ $(function() {
     var uid = Math.random().toString();
     var editor = null;
 
-    function updateData(field, value) {
-        switch (field) {
-            case "value":
-                var newLines = value.split("\n");
-                var oldLines = editor.getValue().split("\n");
-                var mergedLines = [];
-                var oldPosition = editor.getCursorPosition();
-
-                // Different line was *changed*
-                if (newLines.length === oldLines.length) {
-                    newLines.forEach(function (c, i) {
-                        if (i === oldPosition.row && oldLines[i] !== c) {
-                            var cOldLine = oldLines[i].split("");
-                            var cNewLine = c.split("");
-                            var mergedLine = [];
-                            if (cOldLine.length === cNewLine.length) {
-                                mergedLine = cNewLine;
-                            } else {
-                                // Some lines were removed
-                                var wasAdded = cNewLine.length > cOldLine.length;
-                                var added = wasAdded ? cNewLine : cOldLine;
-                                var deleted = !wasAdded ? cNewLine : cOldLine;
-                                var offset = 0;
-
-                                added = added.slice(0, oldPosition.column + 1);
-                                for (var ii = 0; ii < added.length; ++ii) {
-                                    if (added[ii] !== deleted[ii]) {
-                                        offset = cNewLine.length - cOldLine.length;
-                                        break;
-                                    }
-                                }
-
-                                oldPosition.column += offset;
-                                mergedLine = cNewLine;
-                            }
-                            mergedLines[i] = mergedLine.join("");
-                            return;
-                        }
-                        mergedLines[i] = c;
-                    });
-                } else {
-                    // Some lines were removed
-                    var wasAdded = newLines.length > oldLines.length;
-                    var added = wasAdded ? newLines : oldLines;
-                    var deleted = !wasAdded ? newLines : oldLines;
-                    var offset = 0;
-
-                    added = added.slice(0, oldPosition.row + 1);
-                    for (var i = 0; i < added.length; ++i) {
-                        if (added[i] !== deleted[i]) {
-                            offset = newLines.length - oldLines.length;
-                            break;
-                        }
-                    }
-
-                    oldPosition.row += offset;
-                    mergedLines = newLines;
-                }
-
-                editor.setValue(mergedLines.join("\n"), -1);
-                editor.gotoLine(oldPosition.row + 1, oldPosition.column)
-                editor.focus();
-                break;
-            case "lang":
-                // Set the language
-                var cLang = $selectLang.val();
-                if (cLang !== value) {
-                    $selectLang.val(value).change();
-                }
-                break;
-        }
-    }
-
     function setEditorValue(c) {
         var val = c.val();
         if (val === null) {
             editorValues.child(editorId).set({
-                value: "",
-                lang: "text"
+                lang: "JavaScript"
             })
-        } else {
-            if (typeof val === "object") {
-                return Object.keys(val).forEach(function(cField) {
-                    updateData(cField, val[cField]);
-                });
-            }
-
-            // If we want to update the value...
-            if (c.key === "value") {
-                // Get the last_edit_by value
-                c.ref.getParent().child("last_edit_by").once("value", function(snap) {
-                    // Check if the update was made by the current user
-                    if (snap.val() === uid) {
-                        return;
-                    }
-
-                    // ...otherwise, update the editor
-                    updateData(c.key, val);
-                });
-            } else {
-                updateData(c.key, val);
-            }
         }
     }
 
@@ -168,7 +70,7 @@ $(function() {
     // Take the editor value on start and set it in the editor
     currentEditorValue.once("value", function(data) {
         // Initialize the ACE editor
-        editor = ace.edit("editor");
+        window.editor  = editor = ace.edit("editor");
         editor.setTheme(getTheme());
         editor.$blockScrolling = Infinity;
 
@@ -177,19 +79,33 @@ $(function() {
             if (!editor.curOp || !editor.curOp.command.name) {
                 return;
             }
-            currentEditorValue.update({
-                value: editor.getValue(),
-                last_edit_by: uid
+            currentEditorValue.child("queue").push({
+                event: e,
+                by: uid
             }).then(function(c) {
                 console.log(c)
             }).catch(function(e) {
                 console.error(e)
             });
-        })
+        });
+
+        var doc = editor.getSession().getDocument();
+
+        currentEditorValue.child("queue").on("child_added", function (ref) {
+            var value = ref.val();
+            editor.curOp = null;
+            if (value.by === uid) { return; }
+            doc.applyDeltas([value.event]);
+        });
 
         setEditorValue(data);
+        currentEditorValue.child("lang").on("value", function (r) {
+            var value = r.val();
+            // Set the language
+            var cLang = $selectLang.val();
+            if (cLang !== value) {
+                $selectLang.val(value).change();
+            }
+        });
     });
-
-    // When the value is changed, update it in the editor
-    currentEditorValue.on("child_changed", setEditorValue);
 });
