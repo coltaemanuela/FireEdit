@@ -62,6 +62,33 @@ $(function() {
                 // Different line was *changed*
                 if (newLines.length === oldLines.length) {
                     newLines.forEach(function (c, i) {
+                        if (i === oldPosition.row && oldLines[i] !== c) {
+                            var cOldLine = oldLines[i].split("");
+                            var cNewLine = c.split("");
+                            var mergedLine = [];
+                            if (cOldLine.length === cNewLine.length) {
+                                mergedLine = cNewLine;
+                            } else {
+                                // Some lines were removed
+                                var wasAdded = cNewLine.length > cOldLine.length;
+                                var added = wasAdded ? cNewLine : cOldLine;
+                                var deleted = !wasAdded ? cNewLine : cOldLine;
+                                var offset = 0;
+
+                                added = added.slice(0, oldPosition.column + 1);
+                                for (var ii = 0; ii < added.length; ++ii) {
+                                    if (added[ii] !== deleted[ii]) {
+                                        offset = cNewLine.length - cOldLine.length;
+                                        break;
+                                    }
+                                }
+
+                                oldPosition.column += offset;
+                                mergedLine = cNewLine;
+                            }
+                            mergedLines[i] = mergedLine.join("");
+                            return;
+                        }
                         mergedLines[i] = c;
                     });
                 } else {
@@ -71,7 +98,7 @@ $(function() {
                     var deleted = !wasAdded ? newLines : oldLines;
                     var offset = 0;
 
-                    added = added.slice(0, oldPosition.row);
+                    added = added.slice(0, oldPosition.row + 1);
                     for (var i = 0; i < added.length; ++i) {
                         if (added[i] !== deleted[i]) {
                             offset = newLines.length - oldLines.length;
