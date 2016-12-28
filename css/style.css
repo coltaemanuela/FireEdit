@@ -13,7 +13,7 @@
     right: 5px;
     z-index: 10;
 }
-.select-input{
+#select .select-input{
 	height: 30px;
     color: #154349;
     border-radius: 5px;
