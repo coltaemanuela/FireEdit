@@ -7,9 +7,24 @@
     </head>
 
 
-    <body>
-     
+    <body onload="myFunction()">
+     <h2>Welcome to FireEdit!</h2>
     <div id="editor">Welcome to FireEdit!</div>
+    <div id="loader"></div>
+   
+    <script>
+    var myVar;
+
+    function myFunction() {
+        myVar = setTimeout(showPage, 5000);
+    }
+
+    function showPage() {
+      document.getElementById("loader").style.display = "none";
+      document.getElementById("editor").style.display = "block";
+    }
+    </script>
+
 	<script src="https://www.gstatic.com/firebasejs/3.6.4/firebase.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
