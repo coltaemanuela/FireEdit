@@ -53,7 +53,7 @@ $(function() {
         var val = c.val();
         if (val === null) {
             editorValues.child(editorId).set({
-                lang: "JavaScript"
+                lang: "javascript"
             })
         }
     }
@@ -74,12 +74,15 @@ $(function() {
         editor.setTheme(getTheme());
         editor.$blockScrolling = Infinity;
 
+
         // When we change something in the editor, update the value in Firebase
         editor.on("change", function(e) {
             if (!editor.curOp || !editor.curOp.command.name) {
                 return;
             }
-            currentEditorValue.child("queue").push({
+            // set(id, {})
+            // .child(id).set({})
+            currentEditorValue.child("queue").child(Date.now().toString()).set({
                 event: e,
                 by: uid
             }).then(function(c) {
@@ -101,6 +104,7 @@ $(function() {
         setEditorValue(data);
         currentEditorValue.child("lang").on("value", function (r) {
             var value = r.val();
+            // if (date.now() > r.key) { return; }
             // Set the language
             var cLang = $selectLang.val();
             if (cLang !== value) {
