@@ -1,33 +1,31 @@
-
 #editor {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: none;
 }
 
 .controls {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    z-index: 10;
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  z-index: 10;
 }
- .select-input{
-    height: 30px;
-    color: #154349;
-    border-radius: 5px;
-    border: 2px solid #64CEAA;
+
+.select-input{
+  height: 30px;
+  color: #154349;
+  border-radius: 5px;
+  border: 2px solid #64CEAA;
 }
-/*#editor{
-	display:none;
-}*/
 
 #loader {
   position: absolute;
   left: 50%;
   top: 50%;
-  z-index: 1;
+  z-index: 11;
   width: 150px;
   height: 150px;
   margin: -75px 0 0 -75px;
@@ -52,13 +50,9 @@
 
 
 h2 {
-  /*display: none;*/
   text-align: center;
   font-family: 'Pacifico', cursive;
   font-size: 30px;
   margin-top: 85px;
   color: gray;
-}
-#editor{
-	display: none;
 }

@@ -1,4 +1,5 @@
 $(function() {
+
     // Initialize Firebase
     var config = {
         apiKey: "AIzaSyAsFK9oDTtsCdqrHAfQKs8_TmNtBOoIkBY",
@@ -9,24 +10,9 @@ $(function() {
     };
     firebase.initializeApp(config);
 
-
-    /*
-    editor_values: {
-      <id>: {
-          lang: "js",
-          queue: []
-      }
-    }
-    */
-
-   // var editorId = 123;
-    //create a custom ID
     var editorId=Url.queryString("id")||"_";
-	// if(!editorId){
-	// 	var defaultId=_id;
-	// }
-
     var LS_THEME_KEY = "editor-theme";
+
     function getTheme() {
         return localStorage.getItem(LS_THEME_KEY) || "ace/theme/monokai";
     }
@@ -39,7 +25,6 @@ $(function() {
     }).val(getTheme());
 
     var $selectLang = $("#select-lang").change(function () {
-        console.log(this.value);
         currentEditorValue.update({
             lang: this.value
         });
@@ -49,67 +34,86 @@ $(function() {
     var uid = Math.random().toString();
     var editor = null;
 
-    function setEditorValue(c) {
-        var val = c.val();
-        if (val === null) {
-            editorValues.child(editorId).set({
-                lang: "javascript"
-            })
-        }
-    }
-
-    // 1. Check if the editor id exists already.
-    // 2. Take the editor value and set it in the editor (textarea/ACE editor)
-    // 3. When the value is changed by anyone, update the editor value.
-    // 4. When we change the value in the editor, update the value in Firebase.
-
     var db = firebase.database();
     var editorValues = db.ref("editor_values");
     var currentEditorValue = editorValues.child(editorId);
+    var openPageTimestamp = Date.now();
 
     // Take the editor value on start and set it in the editor
-    currentEditorValue.once("value", function(data) {
-        // Initialize the ACE editor
-        window.editor  = editor = ace.edit("editor");
-        editor.setTheme(getTheme());
-        editor.$blockScrolling = Infinity;
+    currentEditorValue.child("content").once("value", function (contentRef) {
 
-
-        // When we change something in the editor, update the value in Firebase
-        editor.on("change", function(e) {
-            if (!editor.curOp || !editor.curOp.command.name) {
-                return;
-            }
-            // set(id, {})
-            // .child(id).set({})
-            currentEditorValue.child("queue").child(Date.now().toString()).set({
-                event: e,
-                by: uid
-            }).then(function(c) {
-                console.log(c)
-            }).catch(function(e) {
-                console.error(e)
-            });
-        });
-
-        var doc = editor.getSession().getDocument();
-
-        currentEditorValue.child("queue").on("child_added", function (ref) {
-            var value = ref.val();
-            editor.curOp = null;
-            if (value.by === uid) { return; }
-            doc.applyDeltas([value.event]);
-        });
-
-        setEditorValue(data);
+        // Somebody changed the lang. Hey, we have to update it in our editor too!
         currentEditorValue.child("lang").on("value", function (r) {
             var value = r.val();
-            // if (date.now() > r.key) { return; }
             // Set the language
             var cLang = $selectLang.val();
             if (cLang !== value) {
                 $selectLang.val(value).change();
             }
         });
+
+        // Hide the spinner
+        $("#loader").fadeOut();
+        $("#editor").fadeIn();
+
+        // Initialize the ACE editor
+        editor = ace.edit("editor");
+        editor.setTheme(getTheme());
+        editor.$blockScrolling = Infinity;
+
+        var queueRef = currentEditorValue.child("queue");
+
+        // When we change something in the editor, update the value in Firebase
+        editor.on("change", function(e) {
+            if (!editor.curOp || !editor.curOp.command.name) {
+                return;
+            }
+
+            currentEditorValue.update({
+                content: editor.getValue()
+            });
+
+            queueRef.child(Date.now().toString() + ":" + Math.random().toString().slice(2)).set({
+                event: e,
+                by: uid
+            }).catch(function(e) {
+                console.error(e)
+            });
+        });
+
+
+        var doc = editor.getSession().getDocument();
+
+        // Take the editor value and set it in the editor
+        queueRef.on("child_added", function (ref) {
+            var timestamp = ref.key.split(":")[0];
+
+            // Do not apply changes from the past
+            if (openPageTimestamp > timestamp) {
+                return;
+            }
+
+            var value = ref.val();
+            editor.curOp = null;
+            if (value.by === uid) { return; }
+
+            doc.applyDeltas([value.event]);
+        });
+
+        var val = contentRef.val();
+        var initialContent = "Welcome to FireEdit!";
+
+        // Check if the editor id exists already.
+        if (val === null) {
+            editorValues.child(editorId).set({
+                lang: "javascript",
+                queue: {},
+                content: initialContent
+            })
+            val = initialContent;
+        }
+
+        editor.setValue(val, -1);
+        editor.focus();
     });
 });
