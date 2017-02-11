@@ -20,6 +20,12 @@
   border-radius: 5px;
   border: 2px solid #64CEAA;
 }
+#form{
+  height: 30px;
+  color: #154349;
+  border-radius: 5px;
+  border: 2px solid #64CEAA;
+}
 
 #loader {
   position: absolute;
