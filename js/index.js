@@ -62,10 +62,11 @@ $(function() {
         editor.$blockScrolling = Infinity;
 
         var queueRef = currentEditorValue.child("queue");
+        var applyingDeltas = false;
 
         // When we change something in the editor, update the value in Firebase
         editor.on("change", function(e) {
-            if (!editor.curOp || !editor.curOp.command.name) {
+            if (applyingDeltas) {
                 return;
             }
 
@@ -97,7 +98,9 @@ $(function() {
             editor.curOp = null;
             if (value.by === uid) { return; }
 
+            applyingDeltas = true;
             doc.applyDeltas([value.event]);
+            applyingDeltas = false;
         });
 
         var val = contentRef.val();
@@ -113,7 +116,9 @@ $(function() {
             val = initialContent;
         }
 
+        applyingDeltas = true;
         editor.setValue(val, -1);
+        applyingDeltas = false;
         editor.focus();
     });
 });
