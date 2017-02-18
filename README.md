@@ -1,9 +1,10 @@
 # FireEdit
 A real-time editor built with JavaScript and Firebase.
 
-Real-time collaboration is enhanced by Firebase. Access the editor, personalize it by naming it and by choosing the theme your prefer, share the URL and start the collaboration.
+Real-time collaboration is enhanced by Firebase.
+Access the editor, personalize it by naming it and by choosing the theme your prefer, share the URL and start the collaboration.
 
-A complete tutorial which explains step by step how this application has been created is available at the following link: : https://www.codementor.io/johnnyb/fireedit-real-time-editor-javascript-firebase-59lnmf3c6
+A complete tutorial which explains step by step how this application has been created is available at the following link: https://www.codementor.io/johnnyb/fireedit-real-time-editor-javascript-firebase-59lnmf3c6
 
 [Click here](https://coltaemanuela.github.io/FireEdit/) to see it in action. :rocket:
 
