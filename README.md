@@ -1,4 +1,4 @@
-# FireEdit
+# :fire: FireEdit :pencil:
 A real-time editor built with JavaScript and Firebase.
 
 Real-time collaboration is enhanced by Firebase.
