@@ -20,4 +20,4 @@ This is an open-source app—built by [@ColtaEmanuela](https://github.com/ColtaE
 
 See the [LICENSE](LICENSE) file.
 
-[tutorial]: (https://www.codementor.io/johnnyb/fireedit-real-time-editor-javascript-firebase-59lnmf3c6)
+[tutorial]: https://www.codementor.io/johnnyb/fireedit-real-time-editor-javascript-firebase-59lnmf3c6
