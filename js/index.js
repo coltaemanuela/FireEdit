@@ -1,11 +1,12 @@
 $(function() {
 
     // Initialize Firebase configuration
+    var firebaseId = "xxx";
     var config = {
-        apiKey: "AIzaSyAsFK9oDTtsCdqrHAfQKs8_TmNtBOoIkBY",
-        authDomain: "emma-ea74d.firebaseapp.com",
-        databaseURL: "https://emma-ea74d.firebaseio.com",
-        storageBucket: "emma-ea74d.appspot.com",
+        apiKey: "",
+        authDomain: firebaseId + ".firebaseapp.com",
+        databaseURL: "https://" + firebaseId + ".firebaseio.com",
+        storageBucket: firebaseId + ".appspot.com",
         messagingSenderId: "95300595436"
     };
     firebase.initializeApp(config);
